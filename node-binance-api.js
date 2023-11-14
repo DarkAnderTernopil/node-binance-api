@@ -497,12 +497,7 @@ let api = function Binance( options = {} ) {
             params.timeInForce = 'GTX'; // Post only by default. Use GTC for limit orders.
         }
 
-        let testOrderUrl = '/test';
-        if (params.isReal) {
-            testOrderUrl = ''
-        }
-
-        return promiseRequest( `v1/order${testOrderUrl}`, params, { base:fapi, type:'TRADE', method:'POST' } );
+        return promiseRequest( `v1/order`, params, { base:fapi, type:'TRADE', method:'POST' } );
     };
     const deliveryOrder = async ( side, symbol, quantity, price = false, params = {} ) => {
         params.symbol = symbol;
@@ -4121,6 +4116,11 @@ let api = function Binance( options = {} ) {
         futuresMultipleOrders: async ( orders = [{}] ) => {
             let params = { batchOrders: JSON.stringify(orders) };
             return promiseRequest( 'v1/batchOrders', params, { base:fapi, type:'TRADE', method:'POST'} );
+        },
+
+        futuresCancelMultipleOrders: async (symbol, orderIdList) => {
+            let params = { orderIdList, symbol };
+            return promiseRequest( 'v1/batchOrders', params, { base:fapi, type:'TRADE', method:'DELETE'} );
         },
 
         futuresOrder, // side symbol quantity [price] [params]

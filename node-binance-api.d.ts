@@ -973,6 +973,8 @@ declare module "node-binance-api" {
         futuresCancelAll(symbol: _symbol, params?: any): Promise<any>;
         futuresCancelAll(...args: any): any;
 
+        futuresCancelMultipleOrders(symbol: _symbol, orderIdList: number[]): Promise<any>;
+
         futuresCountdownCancelAll(symbol: _symbol, countdownTime?: number, params?: any): Promise<any>;
         futuresCountdownCancelAll(...args: any): any;
 
