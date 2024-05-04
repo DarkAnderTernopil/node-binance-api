@@ -7,7 +7,8 @@
  * ============================================================
  * @module jaggedsoft/node-binance-api
  * @return {object} instance to class object */
-let api = function Binance( options = {} ) {
+const axios = require("axios");
+let api = function Binance(options = {} ) {
     if ( !new.target ) return new api( options ); // Legacy support for calling the constructor without 'new'
     let Binance = this; // eslint-disable-line consistent-this
     const WebSocket = require( 'ws' );
@@ -521,7 +522,7 @@ let api = function Binance( options = {} ) {
         return promiseRequest( 'v1/order', params, { base:dapi, type:'TRADE', method:'POST' } );
     };
     const promiseRequest = async ( url, data = {}, flags = {} ) => {
-        return new Promise( ( resolve, reject ) => {
+        return new Promise( async ( resolve, reject ) => {
             let query = '', headers = {
                 'User-Agent': userAgent,
                 'Content-type': 'application/x-www-form-urlencoded'
@@ -557,27 +558,31 @@ let api = function Binance( options = {} ) {
                 opt.qs = data;
             }*/
             try {
-                request( addProxy( opt ), ( error, response, body ) => {
-                    if ( error ) return reject( error );
-                    try {
-                        Binance.info.lastRequest = new Date().getTime();
-                        if ( response ) {
-                            Binance.info.statusCode = response.statusCode || 0;
-                            if ( response.request ) Binance.info.lastURL = response.request.uri.href;
-                            if ( response.headers ) {
-                                Binance.info.usedWeight = response.headers['x-mbx-used-weight-1m'] || 0;
-                                Binance.info.futuresLatency = response.headers['x-response-time'] || 0;
-                            }
-                        }
-                        if ( !error && response.statusCode == 200 ) return resolve( JSONbig.parse( body ) );
-                        if ( typeof response.body !== 'undefined' ) {
-                            return resolve( JSONbig.parse( response.body ) );
-                        }
-                        return reject( response );
-                    } catch ( err ) {
-                        return reject( `promiseRequest error #${ response.statusCode }` );
-                    }
-                } ).on( 'error', reject );
+                const {data} = await axios(opt);
+                if (data) {
+                    resolve(data);
+                }
+                // request( addProxy( opt ), ( error, response, body ) => {
+                //     if ( error ) return reject( error );
+                //     try {
+                //         Binance.info.lastRequest = new Date().getTime();
+                //         if ( response ) {
+                //             Binance.info.statusCode = response.statusCode || 0;
+                //             if ( response.request ) Binance.info.lastURL = response.request.uri.href;
+                //             if ( response.headers ) {
+                //                 Binance.info.usedWeight = response.headers['x-mbx-used-weight-1m'] || 0;
+                //                 Binance.info.futuresLatency = response.headers['x-response-time'] || 0;
+                //             }
+                //         }
+                //         if ( !error && response.statusCode == 200 ) return resolve( JSONbig.parse( body ) );
+                //         if ( typeof response.body !== 'undefined' ) {
+                //             return resolve( JSONbig.parse( response.body ) );
+                //         }
+                //         return reject( response );
+                //     } catch ( err ) {
+                //         return reject( `promiseRequest error #${ response.statusCode }` );
+                //     }
+                // } ).on( 'error', reject );
             } catch ( err ) {
                 return reject( err );
             }
