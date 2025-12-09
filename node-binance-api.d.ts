@@ -967,6 +967,8 @@ declare module "node-binance-api" {
         futuresOrderStatus(symbol: _symbol, params?: any): Promise<any>;
         futuresOrderStatus(...args: any): any;
 
+        futuresCancelAlgoOrder(symbol: _symbol,orderId?: number | string, params?: any): Promise<any>;
+
         futuresCancel(symbol: _symbol, params?: any): Promise<any>;
         futuresCancel(...args: any): any;
 

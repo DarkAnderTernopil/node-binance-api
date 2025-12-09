@@ -497,6 +497,29 @@ let api = function Binance( options = {} ) {
             params.timeInForce = 'GTX'; // Post only by default. Use GTC for limit orders.
         }
 
+        // check if it is algoOrder
+        const conditionalTypes = [
+            'STOP',
+            'STOP_MARKET',
+            'TAKE_PROFIT',
+            'TAKE_PROFIT_MARKET',
+            'TRAILING_STOP_MARKET',
+        ];
+        const typeUpperCase = type.toUpperCase();
+        if (typeUpperCase && conditionalTypes.includes(typeUpperCase)) {
+            const algoPayload = { ...params };
+            if (!algoPayload.clientAlgoId) {
+                algoPayload.clientAlgoId = symbol + "_" + new Date().getTime();
+            }
+            algoPayload.algoType = 'CONDITIONAL';
+            if (algoPayload.stopPrice && !algoPayload.triggerPrice) {
+                algoPayload.triggerPrice = algoPayload.stopPrice;
+                delete algoPayload.stopPrice;
+            }
+            return promiseRequest( 'v1/algoOrder', params, { base:fapi, type:'TRADE', method:'POST' } );
+
+        }
+
         return promiseRequest( `v1/order`, params, { base:fapi, type:'TRADE', method:'POST' } );
     };
     const deliveryOrder = async ( side, symbol, quantity, price = false, params = {} ) => {
@@ -3014,7 +3037,6 @@ let api = function Binance( options = {} ) {
                 }, 'DELETE' );
             }
         },
-
         /**
         * Gets the status of an order
         * @param {string} symbol - the symbol to check
@@ -4130,6 +4152,12 @@ let api = function Binance( options = {} ) {
             return promiseRequest( 'v1/order', params, { base:fapi, type:'SIGNED' } );
         },
 
+        futuresCancelAlgoOrder: async ( symbol, orderId = undefined, params = {} ) => { // Either orderId or origClientOrderId must be sent
+            params.symbol = symbol;
+            if (orderId) params.algoid = orderId;
+            return promiseRequest( 'v1/algoOrder', params, { base:fapi, type:'SIGNED', method:'DELETE' } );
+        },
+
         futuresCancel: async ( symbol, params = {} ) => { // Either orderId or origClientOrderId must be sent
             params.symbol = symbol;
             return promiseRequest( 'v1/order', params, { base:fapi, type:'SIGNED', method:'DELETE' } );
@@ -4137,6 +4165,10 @@ let api = function Binance( options = {} ) {
 
         futuresCancelAll: async ( symbol, params = {} ) => {
             params.symbol = symbol;
+            if ('conditional' in params) {
+                delete params.conditional;
+                return promiseRequest( 'v1/algoOpenOrders', params, { base:fapi, type:'SIGNED', method:'DELETE' } );
+            }
             return promiseRequest( 'v1/allOpenOrders', params, { base:fapi, type:'SIGNED', method:'DELETE' } );
         },
 
@@ -4148,11 +4180,19 @@ let api = function Binance( options = {} ) {
 
         futuresOpenOrders: async ( symbol = false, params = {} ) => {
             if ( symbol ) params.symbol = symbol;
+            if ('conditional' in params) {
+                delete params.conditional;
+                return promiseRequest( 'v1/algoOpenOrders', params, { base:fapi, type:'SIGNED' } );
+            }
             return promiseRequest( 'v1/openOrders', params, { base:fapi, type:'SIGNED' } );
         },
 
         futuresAllOrders: async ( symbol = false, params = {} ) => { // Get all account orders; active, canceled, or filled.
             if ( symbol ) params.symbol = symbol;
+            if ('conditional' in params) {
+                delete params.conditional;
+                return promiseRequest( 'v1/allAlgoOrders', params, { base:fapi, type:'SIGNED' } );
+            }
             return promiseRequest( 'v1/allOrders', params, { base:fapi, type:'SIGNED' } );
         },
 
