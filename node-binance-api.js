@@ -480,6 +480,7 @@ let api = function Binance( options = {} ) {
     const futuresOrder = async ( side, symbol, quantity, price = false, params = {} ) => {
         params.symbol = symbol;
         params.side = side;
+        const type = params.type;
         if ( quantity ) params.quantity = quantity;
         // if in the binance futures setting Hedged mode is active, positionSide parameter is mandatory
         if( typeof params.positionSide === 'undefined' && Binance.options.hedgeMode ){
