@@ -480,7 +480,7 @@ let api = function Binance( options = {} ) {
     const futuresOrder = async ( side, symbol, quantity, price = false, params = {} ) => {
         params.symbol = symbol;
         params.side = side;
-        const type = params.type;
+
         if ( quantity ) params.quantity = quantity;
         // if in the binance futures setting Hedged mode is active, positionSide parameter is mandatory
         if( typeof params.positionSide === 'undefined' && Binance.options.hedgeMode ){
@@ -497,7 +497,7 @@ let api = function Binance( options = {} ) {
         if ( !params.timeInForce && ( params.type.includes( 'LIMIT' ) || params.type === 'STOP' || params.type === 'TAKE_PROFIT' ) ) {
             params.timeInForce = 'GTX'; // Post only by default. Use GTC for limit orders.
         }
-
+        const type = params.type;
         // check if it is algoOrder
         const conditionalTypes = [
             'STOP',
