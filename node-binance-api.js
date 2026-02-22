@@ -575,7 +575,7 @@ let api = function Binance( options = {} ) {
             dataFromBody.forEach( elemInside => {
                 newDataFromBody.push( changeAlgoOrderToMyOrder( elemInside ) );
             } )
-            console.log( newDataFromBody, 'gdgdgdf' );
+
             return newDataFromBody;
         }
 
